@@ -19,24 +19,20 @@ import java.util.*;
 /**
  * Example program to list links from a URL.
  */
-public class ListLinks {
+public class ListLinksModified {
+	static int connectCounter = 0;
+	static long totalConnectionTime=0;
 
 	public static void main(String[] args) throws IOException {
-		/*
-		 * String url = "https://www.smashingmagazine.com"; print("Fetching %s...",
-		 * url); Document doc = Jsoup.connect(url).get(); Elements media =
-		 * doc.select("[src]"); Elements links = doc.select("a[href]");
-		 */
 		long startTime = System.currentTimeMillis();
 		String url = "https://www.smashingmagazine.com";
+		//String url = "https://www.milliyet.com.tr";
 		Set<String> uniqueImageURL = new HashSet<String>();
-		uniqueImageURL = connectToUrl(url, 0);
+		System.out.println("Please provide URL of the page and depth you want to crawl into");
+		uniqueImageURL = connectToUrl(args[0], Integer.parseInt(args[1]));
 		System.out.println();
 		System.out.println("Printing out the images: ");
 		System.out.println();
-		// for (String str : uniqueImageURL) {
-		// System.out.println(str);
-		// }
 		GsonBuilder GsonBuilder = new GsonBuilder();
 
 		Gson gson = GsonBuilder.create();
@@ -48,59 +44,59 @@ public class ListLinks {
 		String prettyJson = prettyGson.toJson(uniqueImageURL);
 
 		System.out.println("\nPretty JSONObject ==> " + prettyJson);
-		
-		try (Writer writer = new FileWriter("OutputWithDepth2.json")) {
-		     
+
+		try (Writer writer = new FileWriter("consoleApplication.json")) {
+
 			prettyGson.toJson(uniqueImageURL, writer);
 		}
 		long endTime = System.currentTimeMillis();
 
 		System.out.println("That took " + (endTime - startTime) + " milliseconds");
-		/*
-		 * Document doc = Jsoup.connect(url).get(); Elements links =
-		 * doc.select("a[href]"); Elements media = doc.select("[src]"); Elements imports
-		 * = doc.select("link[href]"); System.out.println(); System.out.println();
-		 * System.out.println(); print("\nLinks: (%d)", links.size()); for (Element link
-		 * : links) { print(" * a: <%s>  (%s)", link.attr("abs:href"), trim(link.text(),
-		 * 35)); }
-		 */
-		
+		System.out.println("Total connection is " + connectCounter);
+		System.out.println("Total connection time based on Jsoup.connect is "+ totalConnectionTime+" milliseconds");
 
 	}
 
 	private static Set<String> connectToUrl(String inputURL, int depth) {
-		
+		print("Fetching %s with depth " + depth + "...", inputURL);
+		System.out.println();
+		long a, b, c, d, f, g, h, k, l, m, n;
+		a = System.currentTimeMillis();
 		Set<String> uniqueURL = new HashSet<String>();
 		Set<String> uniqueImageURL = new HashSet<String>();
 		Set<String> uniqueTargetURL = new HashSet<String>();
 		Set<String> testCase = new HashSet<String>();
 
 		ArrayList<HashSet<String>> depthList = new ArrayList<HashSet<String>>();
-		ArrayList<HashSet<String>> ImageList = new ArrayList<HashSet<String>>();
-		
+		HashSet<String> ImageList = new HashSet<String>();
+		b = System.currentTimeMillis();
+
 		for (int i = 0; i < depth + 1; i++) {
 			HashSet<String> sample = new HashSet<String>();
 			depthList.add(sample);
 		}
-		for (int i = 0; i < depth + 1; i++) {
-			HashSet<String> sample = new HashSet<String>();
-			ImageList.add(sample);
-		}
+
+		System.out.println("Creation of variables and lists took " + (b - a) + " milliseconds");
 		depthList.get(0).add(inputURL);
 
 		String url = inputURL;
 		Document doc;
-		print("Fetching %s with depth " + depth + "...", url);
 
 		try {
 			if (depth == 0)
 				System.out.println();
 			else {
 				uniqueURL.add(inputURL);
+				c = System.currentTimeMillis();
 				for (int i = 0; i < depth; i++) {
 
 					for (String link : depthList.get(i)) {
+						long c1 = System.currentTimeMillis();
 						doc = Jsoup.connect(link).get();
+						long c2 = System.currentTimeMillis();
+						totalConnectionTime+=c2-c1;
+						System.out.println("It took "+(c2-c1)+" milliseconds to connect "+link);
+						connectCounter++;
 						Elements links = doc.select("a[href]");
 						for (Element InnerLink : links) {
 							if (InnerLink.attr("abs:href").startsWith(url)
@@ -114,6 +110,16 @@ public class ListLinks {
 								if (gate == 1) {
 									uniqueURL.add(InnerLink.attr("abs:href"));
 									depthList.get(i + 1).add(InnerLink.attr("abs:href"));
+
+									Elements media = doc.select("[src]");
+									for (Element src : media) {
+										if (src.normalName().equals("img")
+												&& !src.attr("src").substring(0, 1).equals("/")
+												&& !src.attr("src").substring(0, 1).equals(".")) {
+											uniqueImageURL.add(src.attr("src"));
+											ImageList.add(src.attr("src"));
+										}
+									}
 								}
 
 							}
@@ -121,37 +127,38 @@ public class ListLinks {
 					}
 
 				}
+				d = System.currentTimeMillis();
+				System.out.println("Populating links based on depth took " + (d - c) + " milliseconds");
 			}
 
-			doc = Jsoup.connect(url).get();
-			
-			for (int j = 0; j < depth + 1; j++) {
-				for (String link : depthList.get(j)) {
-					doc = Jsoup.connect(link).get();
-					Elements media = doc.select("[src]");
-					for (Element src : media) {
-						if (src.normalName().equals("img") && !src.attr("src").substring(0, 1).equals("/")
-								&& !src.attr("src").substring(0, 1).equals(".")) {
-							// System.out.println("src : " + src.attr("src"));
-							uniqueImageURL.add(src.attr("src"));
-							ImageList.get(j).add(src.attr("src"));
-						} else {
-							// System.out.println("src : " + src.attr("src"));
-							// uniqueImageURL.add(src.attr("src"));
-						}
+			f = System.currentTimeMillis();
+
+			for (String link : depthList.get(depth)) {
+				long c1 = System.currentTimeMillis();
+				doc = Jsoup.connect(link).get();
+				long c2 = System.currentTimeMillis();
+				totalConnectionTime+=c2-c1;
+				connectCounter++;
+				System.out.println("It took "+(c2-c1)+" milliseconds to connect "+link);
+				Elements media = doc.select("[src]");
+				for (Element src : media) {
+					if(!src.attr("src").equals(""))
+					if (src.normalName().equals("img") && !src.attr("src").substring(0, 1).equals("/")
+							&& !src.attr("src").substring(0, 1).equals(".")) {
+						uniqueImageURL.add(src.attr("src"));
+						ImageList.add(src.attr("src"));
 					}
 				}
 			}
-
-			
+			g = System.currentTimeMillis();
+			//System.out.println("Retrieving images took " + (g - f) + " milliseconds");
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// return uniqueImageURL;
-		return ImageList.get(depth);
-		// return testCase;
+		System.out.println();
+		return ImageList;
 
 	}
 
