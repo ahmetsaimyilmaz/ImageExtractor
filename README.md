@@ -7,12 +7,19 @@ all the links at given depth and extract the images stored in the web page. For 
 will populate links consisted in target url and extract images in those URLs. Give output of the image links as json file.
 
 To run the application first run;
+```` 
+
 
 java -cp "jsoup-1.14.3.jar;gson-2.8.2.jar" ListLinksModified.java
 
+````
 Then after executable is created, run this code with adding necessary parameter.
+
+```` 
+
 
 java -cp "jsoup-1.14.3.jar;gson-2.8.2.jar" ListLinksModified.java https://www.smashingmagazine.com 2
 
-
-
+````
+# Flow Chart Diagram
+![alt text](Flowchart.png)
